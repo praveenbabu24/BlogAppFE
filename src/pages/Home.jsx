@@ -8,7 +8,7 @@ function Home(){
     useEffect(() =>{
         const fetchPosts = async () =>{
             try{
-                const res = await axios.get('http://localhost:5000/api/post')
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/post`)
                 setposts(res.data)
             }
             catch(err){
@@ -20,7 +20,7 @@ function Home(){
 
     const handleLogout = async () =>{
         try{
-            const res = await axios.post('http://localhost:5000/api/auth/logout',{},{
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/auth/logout`,{},{
                 withCredentials:true
             })
             alert(res.data.message)

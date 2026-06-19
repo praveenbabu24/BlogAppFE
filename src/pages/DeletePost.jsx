@@ -10,7 +10,7 @@ function PostDetail(){
     useEffect(()=> {
         const getpost = async () => {
             try{
-                const res = await axios.get(`http://localhost:5000/api/post/${id}`)
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/post/${id}`)
                 setposts(res.data)
             }
             catch(err){
@@ -22,7 +22,7 @@ function PostDetail(){
 
     const handleDelete = async ()=>{
         try{
-            const res = await axios.delete(`http://localhost:5000/api/post/${id}`,{
+            const res = await axios.delete(`${import.meta.env.VITE_API_URL}/api/post/${id}`,{
                 withCredentials:true
             })
             alert(res.data.message)
