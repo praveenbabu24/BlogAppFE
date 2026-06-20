@@ -1,0 +1,45 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - production
+        default: production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Restrict to authorized user
+        if: github.actor != 'praveenbabu24'
+        run: |
+          echo "Unauthorized: only YOUR_GITHUB_USERNAME can trigger this deployment."
+          exit 1
+
+      - name: Check latest build status on main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CONCLUSION=$(curl -s \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/build.yml/runs?branch=main&status=completed&per_page=1" \
+            | jq -r '.workflow_runs[0].conclusion')
+
+          echo "Latest build.yml conclusion on main: $CONCLUSION"
+
+          if [ "$CONCLUSION" != "success" ]; then
+            echo "Aborting deploy — latest build on main did not succeed."
+            exit 1
+          fi
+
+      - name: Trigger Vercel Deploy Hook
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
